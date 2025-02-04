@@ -1,6 +1,7 @@
 # USB Switch Controller
 
 This project provides a web interface and a simple REST API to control a USB switch using a serial connection.
+It was build to control a ATEN US3344I. The author is using a cheap RS485 USB interface to connect to the USB switch.
 
 ## Requirements
 
