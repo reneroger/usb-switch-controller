@@ -124,6 +124,44 @@ def index():
     
     return render_template_string(HTML_TEMPLATE, selected_port=current_port, error=error_message)
 
+@app.route("/api/port", methods=["GET"])
+def get_port():
+    """API endpoint to get the current port."""
+    global current_port
+    if current_port is None:
+        current_port = get_selected_port()
+    return {"current_port": current_port}, 200
+
+@app.route("/api/port", methods=["POST"])
+def set_port():
+    """API endpoint to set a new port."""
+    global current_port
+    new_port = request.form.get("port")
+    if not new_port:
+        return {"error": "Port not specified"}, 400
+
+    logging.info(f"Requested new port: {new_port}")
+    try:
+        with ser_lock:
+            command = f"sw p{new_port}\n".encode()
+            ser_conn.write(command)
+            logging.debug(f"Command sent: {command}")
+            time.sleep(0.1)
+        # Confirm the port change
+        confirmed_port = get_selected_port()
+        if confirmed_port == new_port:
+            current_port = new_port
+            logging.debug(f"Port switch confirmed: {current_port}")
+            return {"current_port": current_port}, 200
+        else:
+            error_message = f"Failed to switch to port {new_port}"
+            logging.error(error_message)
+            return {"error": error_message}, 500
+    except Exception as e:
+        error_message = f"Serial error: {e}"
+        logging.error(error_message)
+        return {"error": error_message}, 500
+
 if __name__ == "__main__":
     from waitress import serve
     logging.info("Starting server on 0.0.0.0:5000")
