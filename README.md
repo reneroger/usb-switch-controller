@@ -13,7 +13,7 @@ This project provides a web interface and a simple REST API to control a USB swi
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/usb-switch-controller.git
+    git clone https://github.com/reneroger/usb-switch-controller.git
     cd usb-switch-controller
     ```
 
@@ -36,7 +36,7 @@ Update the `SERIAL_PORT` and `BAUD_RATE` variables in `script.py` to match your 
 
 1. Start the server:
     ```sh
-    python script.py
+    python script.py --port COM6 --baudrate 38400
     ```
 
 2. Open your web browser and navigate to `http://localhost:5000` to access the web interface.
