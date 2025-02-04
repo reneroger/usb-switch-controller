@@ -91,11 +91,9 @@ def get_selected_port():
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    global current_port
     error_message = None
-    if current_port is None:
-        current_port = get_selected_port()
-    logging.info(f"Selected port: {current_port}")
+    selected_port = get_selected_port()
+    logging.info(f"Selected port: {selected_port}")
     
     if request.method == "POST":
         new_port = request.form.get("port")
@@ -113,7 +111,7 @@ def index():
                 start_time = time.time()
                 confirmed_port = get_selected_port()
                 if confirmed_port == new_port:
-                    current_port = new_port
+                    selected_port = new_port
                     logging.debug(f"Port switch confirmed in {time.time() - start_time:.2f} seconds")
                 else:
                     error_message = f"Failed to switch to port {new_port}"
@@ -122,20 +120,17 @@ def index():
                 error_message = f"Serial error: {e}"
                 logging.error(error_message)
     
-    return render_template_string(HTML_TEMPLATE, selected_port=current_port, error=error_message)
+    return render_template_string(HTML_TEMPLATE, selected_port=selected_port, error=error_message)
 
 @app.route("/api/port", methods=["GET"])
 def get_port():
     """API endpoint to get the current port."""
-    global current_port
-    if current_port is None:
-        current_port = get_selected_port()
+    current_port = get_selected_port()
     return {"current_port": current_port}, 200
 
 @app.route("/api/port", methods=["POST"])
 def set_port():
     """API endpoint to set a new port."""
-    global current_port
     new_port = request.form.get("port")
     if not new_port:
         return {"error": "Port not specified"}, 400
@@ -150,9 +145,8 @@ def set_port():
         # Confirm the port change
         confirmed_port = get_selected_port()
         if confirmed_port == new_port:
-            current_port = new_port
-            logging.debug(f"Port switch confirmed: {current_port}")
-            return {"current_port": current_port}, 200
+            logging.debug(f"Port switch confirmed: {confirmed_port}")
+            return {"current_port": confirmed_port}, 200
         else:
             error_message = f"Failed to switch to port {new_port}"
             logging.error(error_message)
